@@ -13,9 +13,21 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/mohamedm999/CodeFolio/issues"
   },
-  "homepage": "https://github.com/mohamedm999/CodeFolio#readme"
+  "homepage": "https://github.com/mohamedm999/CodeFolio#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.4",
+    "@types/node": "^24.9.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.2"
+  }
 }
