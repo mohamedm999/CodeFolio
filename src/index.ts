@@ -3,6 +3,7 @@ import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { connectDB } from './config/database';
 import { typeDefs } from './graphql/typeDefs';
+import { resolvers } from './graphql/resolvers';
 
 dotenv.config();
 
