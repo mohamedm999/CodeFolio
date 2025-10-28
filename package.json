@@ -20,15 +20,21 @@
   },
   "homepage": "https://github.com/mohamedm999/CodeFolio#readme",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.4",
+    "@types/graphql": "^14.2.3",
     "@types/node": "^24.9.1",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@apollo/server": "^5.0.0",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "graphql": "^16.11.0",
     "mongoose": "^8.19.2"
   }
 }
