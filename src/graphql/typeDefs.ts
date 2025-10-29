@@ -103,11 +103,5 @@ export const typeDefs = `#graphql
   # La query agrégée
   getPortfolio: PortfolioPayload
   }
-
-  type PortfolioPayload {
-  profile: Profile
-  projects: [Project]
-  skills: [Skill]
-  experiences: [Experience]
-  }
+  
 `;
