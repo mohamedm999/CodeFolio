@@ -94,13 +94,21 @@ export const typeDefs = `#graphql
   experiences: [Experience]
   }
 
+  type Mutation {
+    login(username: String!, password: String!): AuthPayload
+    refreshToken(refreshToken: String!): AuthPayload
+  }
+
+  type AuthPayload {
+    accessToken: String!
+    refreshToken: String!
+  }
+
   type Query {
   getProfil: Profile
   getProjets: [Project]
   getCompetences: [Skill]
   getExperiences: [Experience]
-
-  # La query agrégée
   getPortfolio: PortfolioPayload
   }
   
