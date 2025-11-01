@@ -1,3 +1,4 @@
+import { GraphQLError } from 'graphql';
 import { Profile } from '../models/Profile.model';
 import { Project } from '../models/Project.model';
 import { Skill } from '../models/Skill.model';
@@ -40,16 +41,22 @@ export const resolvers = {
     login: async (_: any, { username, password }: { username: string; password: string }) => {
       const user = await User.findOne({ username });
       if (!user) {
-        throw new Error('Invalid credentials');
+        throw new GraphQLError('Invalid credentials', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
       }
 
       const isValid = await bcrypt.compare(password, user.password);
       if (!isValid) {
-        throw new Error('Invalid credentials');
+        throw new GraphQLError('Invalid credentials', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
       }
 
       if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
-        throw new Error('JWT secrets not configured');
+        throw new GraphQLError('Server configuration error', {
+          extensions: { code: 'INTERNAL_SERVER_ERROR' }
+        });
       }
 
       const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
@@ -60,7 +67,9 @@ export const resolvers = {
     ,
     refreshToken: async (_: any, { refreshToken }: { refreshToken: string }) => {
       if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
-        throw new Error('JWT secrets not configured');
+        throw new GraphQLError('Server configuration error', {
+          extensions: { code: 'INTERNAL_SERVER_ERROR' }
+        });
       }
 
       try {
@@ -68,7 +77,9 @@ export const resolvers = {
         const accessToken = jwt.sign({ userId: decoded.userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
         return { accessToken, refreshToken };
       } catch (error) {
-        throw new Error('Invalid refresh token');
+        throw new GraphQLError('Invalid or expired refresh token', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
       }
     }
   }
