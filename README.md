@@ -46,10 +46,33 @@ MONGODB_URI=mongodb://localhost:27017/codefolio
 
 ## 🏃 Démarrage
 
+### Développement Local
 ```bash
-# Développement
 npm run dev
+```
 
-# Production
+### Production
+```bash
+npm run build
 npm start
+```
+
+### Docker
+```bash
+# Démarrer tous les services
+docker-compose up -d
+
+# Arrêter les services
+docker-compose down
+
+# Voir les logs
+docker-compose logs -f api
+```
+
+## 🧪 Tests
+
+```bash
+npm test              # Run all tests
+npm run test:watch    # Watch mode
+npm run test:coverage # With coverage
 ```

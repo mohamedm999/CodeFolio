@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: codefolio-mongo
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: codefolio
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codefolio-api
+    restart: always
+    ports:
+      - "4001:4000"
+    depends_on:
+      - mongo
+    environment:
+      PORT: 4000
+      MONGO_URI: mongodb://mongo:27017/codefolio
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+    volumes:
+      - ./src:/app/src
+      - /app/node_modules
+
+volumes:
+  mongo-data:
