@@ -81,6 +81,166 @@ export const resolvers = {
           extensions: { code: 'UNAUTHENTICATED' }
         });
       }
+    },
+
+    updateProfil: async (_: any, { input }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const profile = await Profile.findOneAndUpdate(
+        { userId: context.user.id },
+        { $set: input },
+        { new: true, upsert: true }
+      );
+
+      return profile;
+    },
+
+    createProjet: async (_: any, { input }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const project = await Project.create({
+        ...input,
+        userId: context.user.id
+      });
+
+      return project;
+    },
+
+    updateProjet: async (_: any, { id, input }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const project = await Project.findOneAndUpdate(
+        { _id: id, userId: context.user.id },
+        { $set: input },
+        { new: true }
+      );
+
+      if (!project) {
+        throw new GraphQLError('Project not found', {
+          extensions: { code: 'NOT_FOUND' }
+        });
+      }
+
+      return project;
+    },
+
+    deleteProjet: async (_: any, { id }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const result = await Project.findOneAndDelete({ _id: id, userId: context.user.id });
+      return !!result;
+    },
+
+    createCompetence: async (_: any, { input }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const skill = await Skill.create({
+        ...input,
+        userId: context.user.id
+      });
+
+      return skill;
+    },
+
+    updateCompetence: async (_: any, { id, input }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const skill = await Skill.findOneAndUpdate(
+        { _id: id, userId: context.user.id },
+        { $set: input },
+        { new: true }
+      );
+
+      if (!skill) {
+        throw new GraphQLError('Skill not found', {
+          extensions: { code: 'NOT_FOUND' }
+        });
+      }
+
+      return skill;
+    },
+
+    deleteCompetence: async (_: any, { id }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const result = await Skill.findOneAndDelete({ _id: id, userId: context.user.id });
+      return !!result;
+    },
+
+    createExperience: async (_: any, { input }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const experience = await Experience.create({
+        ...input,
+        userId: context.user.id
+      });
+
+      return experience;
+    },
+
+    updateExperience: async (_: any, { id, input }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const experience = await Experience.findOneAndUpdate(
+        { _id: id, userId: context.user.id },
+        { $set: input },
+        { new: true }
+      );
+
+      if (!experience) {
+        throw new GraphQLError('Experience not found', {
+          extensions: { code: 'NOT_FOUND' }
+        });
+      }
+
+      return experience;
+    },
+
+    deleteExperience: async (_: any, { id }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const result = await Experience.findOneAndDelete({ _id: id, userId: context.user.id });
+      return !!result;
     }
   }
 };
