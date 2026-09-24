@@ -4,33 +4,47 @@ import { Project } from '../models/Project.model';
 import { Skill } from '../models/Skill.model';
 import { Experience } from '../models/Experience.model';
 import { User } from '../models/User.model';
+import { TokenBlacklist } from '../models/TokenBlacklist.model';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export const resolvers = {
   Query: {
-    getProfil: async (_: any, { userId }: { userId: string }) => {
-      return await Profile.findOne({ userId });
+    getProfil: async () => {
+      const user = await User.findOne();
+      if (!user) return null;
+      return await Profile.findOne({ userId: user._id });
     },
     
-    getProjets: async (_: any, { userId }: { userId: string }) => {
-      return await Project.find({ userId });
+    getProjets: async () => {
+      const user = await User.findOne();
+      if (!user) return [];
+      return await Project.find({ userId: user._id });
     },
     
-    getCompetences: async (_: any, { userId }: { userId: string }) => {
-      return await Skill.find({ userId });
+    getCompetences: async () => {
+      const user = await User.findOne();
+      if (!user) return [];
+      return await Skill.find({ userId: user._id });
     },
     
-    getExperiences: async (_: any, { userId }: { userId: string }) => {
-      return await Experience.find({ userId });
+    getExperiences: async () => {
+      const user = await User.findOne();
+      if (!user) return [];
+      return await Experience.find({ userId: user._id });
     },
     
-    getPortfolio: async (_: any, { userId }: { userId: string }) => {
+    getPortfolio: async () => {
+      const user = await User.findOne();
+      if (!user) {
+        return { profile: null, projects: [], skills: [], experiences: [] };
+      }
+      
       const [profile, projects, skills, experiences] = await Promise.all([
-        Profile.findOne({ userId }),
-        Project.find({ userId }),
-        Skill.find({ userId }),
-        Experience.find({ userId })
+        Profile.findOne({ userId: user._id }),
+        Project.find({ userId: user._id }),
+        Skill.find({ userId: user._id }),
+        Experience.find({ userId: user._id })
       ]);
       
       return { profile, projects, skills, experiences };
@@ -62,9 +76,8 @@ export const resolvers = {
       const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
       const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
       return { accessToken, refreshToken };
-    }
-  
-    ,
+    },
+    
     refreshToken: async (_: any, { refreshToken }: { refreshToken: string }) => {
       if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
         throw new GraphQLError('Server configuration error', {
@@ -81,6 +94,64 @@ export const resolvers = {
           extensions: { code: 'UNAUTHENTICATED' }
         });
       }
+    },
+
+    logout: async (_: any, __: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      try {
+        const token = context.user.token;
+        const decoded = jwt.decode(token) as any;
+        
+        if (!decoded || !decoded.exp) {
+          throw new GraphQLError('Invalid token', {
+            extensions: { code: 'UNAUTHENTICATED' }
+          });
+        }
+
+        // Ajouter le token à la blacklist
+        await TokenBlacklist.create({
+          token,
+          userId: context.user.id,
+          expiresAt: new Date(decoded.exp * 1000) // exp est en secondes, Date attend des millisecondes
+        });
+
+        return true;
+      } catch (error: any) {
+        if (error instanceof GraphQLError) {
+          throw error;
+        }
+        throw new GraphQLError('Logout failed', {
+          extensions: { code: 'INTERNAL_SERVER_ERROR' }
+        });
+      }
+    },
+
+    createProfil: async (_: any, { input }: any, context: any) => {
+      if (!context.user) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      // Vérifier si un profil existe déjà
+      const existingProfile = await Profile.findOne({ userId: context.user.id });
+      if (existingProfile) {
+        throw new GraphQLError('Profile already exists. Use updateProfil instead.', {
+          extensions: { code: 'PROFILE_ALREADY_EXISTS' }
+        });
+      }
+
+      const profile = await Profile.create({
+        ...input,
+        userId: context.user.id
+      });
+
+      return profile;
     },
 
     updateProfil: async (_: any, { input }: any, context: any) => {

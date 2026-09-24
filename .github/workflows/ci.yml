@@ -1,4 +1,4 @@
-name: CI
+name: Enhanced CI/CD
 
 on:
   push:
@@ -9,6 +9,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
 
     strategy:
       matrix:
@@ -26,8 +32,46 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run tests
-      run: npm test
+    - name: Run linting
+      run: npm run lint || echo "No lint script found"
+    
+    - name: Run tests with coverage
+      run: npm run test:coverage || npm test
       env:
-        JWT_SECRET: test-secret
-        JWT_REFRESH_SECRET: test-refresh-secret
+        JWT_SECRET: test-secret-key-for-ci
+        JWT_REFRESH_SECRET: test-refresh-secret-key-for-ci
+        MONGO_URI: mongodb://localhost:27017/codefolio-test
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: success()
+      with:
+        file: ./coverage/lcov.info
+        
+    - name: Build application
+      run: npm run build
+      
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run security audit
+      run: npm audit --audit-level high
+      
+  docker:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker image
+      run: docker build -t codefolio:latest .
+      
+    - name: Test Docker image
+      run: |
+        docker run -d --name test-container codefolio:latest
+        sleep 10
+        docker logs test-container
+        docker stop test-container

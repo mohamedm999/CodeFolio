@@ -61,11 +61,11 @@ export const typeDefs = `#graphql
   }
 
   type Query {
-    getProfil(userId: ID!): Profile
-    getProjets(userId: ID!): [Project]
-    getCompetences(userId: ID!): [Skill]
-    getExperiences(userId: ID!): [Experience]
-    getPortfolio(userId: ID!): PortfolioPayload
+    getProfil(userId: ID): Profile
+    getProjets(userId: ID): [Project]
+    getCompetences(userId: ID): [Skill]
+    getExperiences(userId: ID): [Experience]
+    getPortfolio(userId: ID): PortfolioPayload
   }
    
   type PortfolioPayload {
@@ -156,7 +156,9 @@ export const typeDefs = `#graphql
   type Mutation {
     login(username: String!, password: String!): AuthPayload
     refreshToken(refreshToken: String!): AuthPayload
+    logout: Boolean
     
+    createProfil(input: UpdateProfileInput!): Profile
     updateProfil(input: UpdateProfileInput!): Profile
     
     createProjet(input: CreateProjectInput!): Project
